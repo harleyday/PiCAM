@@ -1,0 +1,12 @@
+[Unit]
+Description=Automatically record video and manage lights, power and shutdown to the pi zero
+After=multi-user.target
+
+[Service]
+User=pi
+Type=idle
+WorkingDirectory=/home/pi
+ExecStart=/usr/bin/python3 /home/pi/bicycle_camera.py
+
+[Install]
+WantedBy=multi-user.target
