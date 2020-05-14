@@ -5,8 +5,8 @@ After=multi-user.target
 [Service]
 User=pi
 Type=idle
-WorkingDirectory=/home/pi
-ExecStart=/usr/bin/python3 /home/pi/bicycle_camera.py
+WorkingDirectory=/home/pi/PiCAM
+ExecStart=/usr/bin/python3 bicycle_camera.py
 
 [Install]
 WantedBy=multi-user.target
