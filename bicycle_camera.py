@@ -4,7 +4,6 @@ from gpiozero import Button, PWMLED, DigitalInputDevice
 from subprocess import check_call
 import picamera
 import io
-from signal import pause
 from datetime import datetime
 import picamera
 
@@ -13,10 +12,9 @@ def shutdown():
     file.write(datetime.now().strftime('%d/%m/%Y, %H:%M:%S') + '\tShutting down\n')
     file.close()
     activity.pulse()
-    camera.stop_recording()
-    camera.close() # shut down the pi if the button is held down for >2 seconds
     activity.blink(on_time=0.1, off_time=0.1, n=5, background=True)
     check_call(['sudo', 'poweroff'])
+
 def low_battery():
     file = open('/mnt/camera.log','a') # automatically stop recording and shut down when the low battery signal is received
     file.write(datetime.now().strftime('%d/%m/%Y, %H:%M:%S') + '\tBattery is low\n')
@@ -42,20 +40,28 @@ with picamera.PiCamera() as camera:
     start_time = datetime.now()
     camera.resolution = (1640,1232) # 1640x1232 at 30fps seems to be the resolution limit which the pi zero w gpu can handle. We could set the reolution lower to achieve higher framerates.
     camera.framerate = 30
-    camera.start_recording('/mnt/' + start_time.strftime('%d-%m-%Y_%H-%M-%S') +'.h264')
+    camera.start_recording('/mnt/' + start_time.strftime('%d-%m-%Y_%H-%M-%S') + '__1' +'.h264')
     file = open('/mnt/camera.log','a')
     file.write(start_time.strftime('%d/%m/%Y, %H:%M:%S') + '\tStarting recording\n')
     file.close()
     print('now recording...')
     try:
-        pause() # we wait here while the camera is recording
+        i=2
+        while True:
+            camera.wait_recording(300) # wait here for 5 minutes while the camera records to a file
+            camera.split_recording('/mnt/' + start_time.strftime('%d-%m-%Y_%H-%M-%S') + '__%d' % i +'.h264')
+            i = i + 1
     except KeyboardInterrupt:
         print('Keyboard interupt')
+        camera.stop_recording()
+        camera.close()
         file = open('/mnt/camera.log','a')
         file.write(datetime.now().strftime('%d/%m/%Y, %H:%M:%S') + '\tKeyboard interrupt\n')
         file.close()
     except:
         print('The camera experienced an error')
+        camera.stop_recording()
+        camera.close()
         file = open('/mnt/camera.log','a')
         file.write(datetime.now().strftime('%d/%m/%Y, %H:%M:%S') + '\tError\n')
         file.close()
