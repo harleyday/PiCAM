@@ -13,6 +13,8 @@ def shutdown():
     file.close()
     activity.pulse()
     activity.blink(on_time=0.1, off_time=0.1, n=5, background=True)
+    camera.stop_recording()
+    camera.close()
     check_call(['sudo', 'poweroff'])
 
 def low_battery():
