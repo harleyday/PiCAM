@@ -5,7 +5,6 @@ from subprocess import check_call
 import picamera
 import io
 from datetime import datetime
-import picamera
 
 def shutdown():
     file = open('/mnt/camera.log','a') # make the activity LED pulse to show the camera is working
